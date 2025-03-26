@@ -8,6 +8,7 @@ import GUI from 'lil-gui'
 // Debug
 const gui = new GUI()
 
+const debugObject = {}
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
 
@@ -18,18 +19,61 @@ const scene = new THREE.Scene()
  * Lights
  */
 // Ambient light
-const ambientLight = new THREE.AmbientLight(0xffffff, 1)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
 gui.add(ambientLight, 'intensity').min(0).max(3).step(0.001)
 scene.add(ambientLight)
 
 // Directional light
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5)
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
 directionalLight.position.set(2, 2, - 1)
 gui.add(directionalLight, 'intensity').min(0).max(3).step(0.001)
 gui.add(directionalLight.position, 'x').min(- 5).max(5).step(0.001)
 gui.add(directionalLight.position, 'y').min(- 5).max(5).step(0.001)
 gui.add(directionalLight.position, 'z').min(- 5).max(5).step(0.001)
 scene.add(directionalLight)
+directionalLight.castShadow =true 
+
+
+directionalLight.shadow.mapSize.width = 1024
+directionalLight.shadow.mapSize.height = 1024
+directionalLight.shadow.camera.left =  -1
+debugObject.left = -1
+gui.add(debugObject, 'left').onFinishChange(() => {
+    directionalLight.shadow.camera.left = debugObject.left;
+    directionalLight.shadow.camera.updateProjectionMatrix();
+    helper.update();
+}).min(- 5).max(5).step(0.001)
+// gui.add(directionalLight.shadow.camera, 'left').min(- 5).max(5).step(0.001)
+directionalLight.shadow.camera.right = 1
+debugObject.right = 1
+// gui.add(directionalLight.shadow.camera, 'right').min(- 5).max(5).step(0.001)
+directionalLight.shadow.camera.top = 1
+debugObject.top = 1
+// gui.add(directionalLight.shadow.camera, 'top').min(- 5).max(5).step(0.001)
+directionalLight.shadow.camera.bottom = -1
+debugObject.bottom = -1
+directionalLight.shadow.camera.near = 1
+directionalLight.shadow.camera.far = 5
+// directionalLight.shadow.radius = 10
+
+
+const helper = new THREE.CameraHelper(directionalLight.shadow.camera)
+scene.add(helper)
+
+
+const spotLight = new THREE.SpotLight(0xffffff, 3, 10, Math.PI * 0.3)
+scene.add(spotLight)
+gui.add(spotLight, 'intensity').min(0).max(3).step(0.001)
+spotLight.castShadow = true;
+spotLight.shadow.mapSize.width = 1024;
+spotLight.shadow.mapSize.height= 1024;
+spotLight.shadow.camera.fov = 30;
+spotLight.shadow.camera.near = 0.1;
+spotLight.shadow.camera.far = 5;
+spotLight.position.set(0, 2, 2);
+scene.add(spotLight.target)
+const spotLightHelper = new THREE.CameraHelper(spotLight.shadow.camera)  
+scene.add(spotLightHelper)
 
 /**
  * Materials
@@ -46,11 +90,12 @@ const sphere = new THREE.Mesh(
     new THREE.SphereGeometry(0.5, 32, 32),
     material
 )
-
+sphere.castShadow = true
 const plane = new THREE.Mesh(
     new THREE.PlaneGeometry(5, 5),
     material
 )
+plane.receiveShadow = true
 plane.rotation.x = - Math.PI * 0.5
 plane.position.y = - 0.5
 
@@ -101,7 +146,8 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
 /**
  * Animate
  */
