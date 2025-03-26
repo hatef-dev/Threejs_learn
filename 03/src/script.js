@@ -1,19 +1,22 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
+import GUI from 'lil-gui'
 /**
  * Base
  */
 // Canvas
+
 const canvas = document.querySelector('canvas.webgl')
 
+const gui = new GUI()
 // Scene
 const scene = new THREE.Scene()
 
 /**
  * Sizes
  */
-const textureLoader = new THREE.TextureLoader()
+
 const rgbeLoader = new RGBELoader()
 
 rgbeLoader.load('./textures/environmentMap/2k.hdr', (environmentMap) =>
@@ -63,6 +66,15 @@ const planeGeometry = new THREE.PlaneGeometry(1, 1)
 const torusGeometry = new THREE.TorusGeometry(0.5, 0.2, 16, 60)
 
 const material = new THREE.MeshPhysicalMaterial()
+material.roughness = 0.5
+material.metalness = 0.5
+gui.add(material, 'roughness').min(0).max(1).step(0.001).name('roughness')
+gui.add(material, 'metalness').min(0).max(1).step(0.001).name('metalness')
+material.side = THREE.DoubleSide
+material.thickness = 0.5
+material.transmission = 1
+// material.thickness = 0.5
+// gui.add(material, 'thickness').min(0).max(1).step(0.001).name('thickness')
 
 const sphere = new THREE.Mesh(sphereGeometry, material)
 const plane = new THREE.Mesh(planeGeometry, material)
@@ -94,6 +106,13 @@ const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
 
+
+    sphere.rotation.y = Math.PI * elapsedTime * 0.25
+    plane.rotation.y = Math.PI * elapsedTime * 0.25
+    torus.rotation.y = Math.PI * elapsedTime * 0.25    
+    sphere.rotation.x = -Math.PI * elapsedTime * 0.25
+    plane.rotation.x = -Math.PI * elapsedTime * 0.25
+    torus.rotation.x = -Math.PI * elapsedTime * 0.25
     // Update controls
     controls.update()
 
