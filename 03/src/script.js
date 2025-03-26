@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 /**
  * Base
  */
@@ -13,6 +13,16 @@ const scene = new THREE.Scene()
 /**
  * Sizes
  */
+const textureLoader = new THREE.TextureLoader()
+const rgbeLoader = new RGBELoader()
+
+rgbeLoader.load('./textures/environmentMap/2k.hdr', (environmentMap) =>
+{
+    environmentMap.mapping = THREE.EquirectangularReflectionMapping
+    scene.background = environmentMap
+    scene.environment = environmentMap
+})
+
 const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
@@ -46,6 +56,25 @@ scene.add(camera)
 // Controls
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true
+
+/***Geometry */
+const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32)
+const planeGeometry = new THREE.PlaneGeometry(1, 1)
+const torusGeometry = new THREE.TorusGeometry(0.5, 0.2, 16, 60)
+
+const material = new THREE.MeshPhysicalMaterial()
+
+const sphere = new THREE.Mesh(sphereGeometry, material)
+const plane = new THREE.Mesh(planeGeometry, material)
+const torus = new THREE.Mesh(torusGeometry, material)
+
+sphere.position.x = -1.5
+plane.position.x = 0
+torus.position.x = 1.5
+
+scene.add(sphere)
+scene.add(plane)
+scene.add(torus)
 
 /**
  * Renderer
