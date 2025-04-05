@@ -51,7 +51,7 @@ lightFolder
   .step(0.001);
 scene.add(ambientLight);
 
-const moonLight = new THREE.DirectionalLight("#b9d5ff", 0.12);
+const moonLight = new THREE.DirectionalLight("#b9d5ff", 0.5);
 moonLight.position.set(1, 1, 1);
 lightFolder
   .add(moonLight, "intensity")
@@ -80,7 +80,7 @@ lightFolder
 scene.add(moonLight);
 
 const doorLights = gui.addFolder("Door Lights");
-const doorLight = new THREE.PointLight("#ff7d46", 1);
+const doorLight = new THREE.PointLight("#ff7d46", 3);
 doorLights
   .add(doorLight, "intensity")
   .min(0)
@@ -260,12 +260,13 @@ const graveMaterial = new THREE.MeshStandardMaterial({ color: "#b2b6b1" });
 for (let i = 0; i < 30; i++) {
   const grave = new THREE.Mesh(graveGeometry, graveMaterial);
   const angle = Math.PI * 2 * Math.random();
-  const radius = 3 + Math.random() * 5;
+  const radius = 2 + Math.random() * 5;
   const x = Math.sin(angle) * radius;
   const z = Math.cos(angle) * radius;
   grave.position.set(x, 0.3, z);
   grave.rotation.y = (Math.random() - 0.5) * 0.4;
   grave.rotation.z = (Math.random() - 0.5) * 0.4;
+  grave.castShadow = true;
   scene.add(grave);
 }
 
@@ -273,6 +274,43 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.render(scene, camera);
+
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+moonLight.castShadow = true;
+moonLight.shadow.mapSize.set(256, 256);
+moonLight.shadow.camera.far = 7
+
+doorLight.castShadow = true;
+doorLight.shadow.mapSize.set(256, 256);
+doorLight.shadow.camera.far = 7;
+
+ghost1Light.castShadow = true;
+ghost1Light.shadow.mapSize.set(256, 256);
+ghost1Light.shadow.camera.far = 7;
+
+ghost2Light.castShadow = true;
+ghost2Light.shadow.mapSize.set(256, 256);
+ghost2Light.shadow.camera.far = 7;
+
+ghost3Light.castShadow = true;
+ghost3Light.shadow.mapSize.set(256, 256);
+ghost3Light.shadow.camera.far = 7;
+
+walls.castShadow = true;
+
+plane.receiveShadow = true;
+
+
+
+
+
+
+
+
+
+
 
 
 
