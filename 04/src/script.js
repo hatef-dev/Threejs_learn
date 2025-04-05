@@ -1,168 +1,137 @@
-import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import GUI from 'lil-gui'
+import * as THREE from "three";
+import GUI from "lil-gui";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-/**
- * Base
- */
-// Debug
-const gui = new GUI()
+const gui = new GUI();
+gui.hide();
+window.addEventListener("keydown", (e) => {
+  if (e.key == "h") {
+    gui.show();
+  }
+});
 
-// Canvas
-const canvas = document.querySelector('canvas.webgl')
+const scene = new THREE.Scene();
 
-// Scene
-const scene = new THREE.Scene()
+const lightFolder = gui.addFolder("Lights");
 
-/**
- * Textures
- */
-const textureLoader = new THREE.TextureLoader()
+const ambientLight = new THREE.AmbientLight("#b9d5ff", 0.5);
+lightFolder
+  .add(ambientLight, "intensity")
+  .min(0)
+  .max(3)
+  .step(0.001)
+  .name("ambientLightIntensity");
+lightFolder
+  .add(ambientLight.position, "x")
+  .name("ambientLightPositionX")
+  .min(-5)
+  .max(5)
+  .step(0.001);
+lightFolder
+  .add(ambientLight.position, "y")
+  .name("ambientLightPositionY")
+  .min(-5)
+  .max(5)
+  .step(0.001);
+lightFolder
+  .add(ambientLight.position, "z")
+  .name("ambientLightPositionZ")
+  .min(-5)
+  .max(5)
+  .step(0.001);
+scene.add(ambientLight);
 
-/**
- * House
- */
-const house = new THREE.Group()
-scene.add(house)
+const moonLight = new THREE.DirectionalLight("#b9d5ff", 1);
+moonLight.position.set(1, 1, 1);
+lightFolder
+  .add(moonLight, "intensity")
+  .min(0)
+  .max(3)
+  .step(0.001)
+  .name("moonLightIntensity");
+lightFolder.add(moonLight.position, "x").min(-5).max(5).step(0.001).name("moonLightPositionX");
+lightFolder.add(moonLight.position, "y").min(-5).max(5).step(0.001).name("moonLightPositionY");
+lightFolder.add(moonLight.position, "z").min(-5).max(5).step(0.001).name("moonLightPositionZ");
+scene.add(moonLight);
 
-// Walls
-const walls = new THREE.Mesh(
-    new THREE.BoxGeometry(4, 2.5, 4),
-    new THREE.MeshStandardMaterial({ color: '#ac8e82' })
-)
+const canvas = document.querySelector(".webgl");
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  100
+);
+camera.position.z = 7;
+camera.position.y = 2;
+camera.position.x = 3;
 
-walls.position.y = 1.25
-house.add(walls)
+scene.add(camera);
 
-// Roof
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+
+const house = new THREE.Group();
+scene.add(house);
+
+const geometry = new THREE.BoxGeometry(2, 1.5, 2);
+const material = new THREE.MeshStandardMaterial();
+const walls = new THREE.Mesh(geometry, material);
+walls.position.y = 0.75;
+house.add(walls);
+
 const roof = new THREE.Mesh(
-    new THREE.ConeGeometry(3.5, 1.5, 4),
-    new THREE.MeshStandardMaterial({ color: '#ac8e82' })
-)
+  new THREE.ConeGeometry(1.75, 1, 4),
+  new THREE.MeshStandardMaterial({ color: "brown" })
+);
+roof.position.y = 2;
+roof.rotation.y = Math.PI / 4;
+house.add(roof);
 
-roof.position.y = 3.25
-gui.add(roof.position, 'y').min(0).max(10).step(0.001)
-roof.rotation.y = Math.PI * 0.25
-house.add(roof) 
+const plane = new THREE.Mesh(
+  new THREE.PlaneGeometry(20, 20),
+  new THREE.MeshStandardMaterial({ color: 0x00ff00 })
+);
+plane.rotation.x = -Math.PI / 2;
+scene.add(plane);
 
-// Floor
-const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(20, 20),
-    new THREE.MeshStandardMaterial({ color: '#a9c388' })
-)
-floor.rotation.x = - Math.PI * 0.5
-floor.position.y = 0
-scene.add(floor)
-
-// Door
 const door = new THREE.Mesh(
-    new THREE.PlaneGeometry(2, 2),
-    new THREE.MeshStandardMaterial({ color: '#a9c388' })
-)
-door.position.y = 1
-door.position.z = 2.01
-house.add(door)
+  new THREE.PlaneGeometry(1, 1.5),
+  new THREE.MeshStandardMaterial({ color: "brown" })
+);
+door.position.y = 0.5;
+door.position.z = 1 + 0.01;
+scene.add(door);
 
-const bushGeometry = new THREE.SphereGeometry(1, 16, 16)
-const bushMaterial = new THREE.MeshStandardMaterial({ color: '#89c854' })
+const graveGeometry = new THREE.BoxGeometry(0.6, 0.8, 0.2);
+const graveMaterial = new THREE.MeshStandardMaterial({ color: "#b2b6b1" });
 
-const bush1 = new THREE.Mesh(bushGeometry, bushMaterial)
-bush1.scale.set(0.5, 0.5, 0.5)
-bush1.position.set(0.8, 0.2, 2.2)
-
-const bush2 = new THREE.Mesh(bushGeometry, bushMaterial)
-bush2.scale.set(0.25, 0.25, 0.25)
-bush2.position.set(1.4, 0.1, 2.1)
-
-const bush3 = new THREE.Mesh(bushGeometry, bushMaterial)
-bush3.scale.set(0.4, 0.4, 0.4)
-bush3.position.set(- 0.8, 0.1, 2.2)
-
-const bush4 = new THREE.Mesh(bushGeometry, bushMaterial)
-bush4.scale.set(0.15, 0.15, 0.15)
-bush4.position.set(- 1, 0.05, 2.6)
-
-house.add(bush1, bush2, bush3, bush4)
-/**
- * Lights
- */
-// Ambient light
-const ambientLight = new THREE.AmbientLight('#ffffff', 0.5)
-gui.add(ambientLight, 'intensity').min(0).max(1).step(0.001)
-scene.add(ambientLight)
-
-// Directional light
-const moonLight = new THREE.DirectionalLight('#ffffff', 1.5)
-moonLight.position.set(4, 5, - 2)
-gui.add(moonLight, 'intensity').min(0).max(1).step(0.001)
-gui.add(moonLight.position, 'x').min(- 5).max(5).step(0.001)
-gui.add(moonLight.position, 'y').min(- 5).max(5).step(0.001)
-gui.add(moonLight.position, 'z').min(- 5).max(5).step(0.001)
-scene.add(moonLight)
-
-/**
- * Sizes
- */
-const sizes = {
-    width: window.innerWidth,
-    height: window.innerHeight
+for (let i = 0; i < 30; i++) {
+  const grave = new THREE.Mesh(graveGeometry, graveMaterial);
+  const angle = Math.PI * 2 * Math.random();
+  const radius = 3 + Math.random() * 5;
+  const x = Math.sin(angle) * radius;
+  const z = Math.cos(angle) * radius;
+  grave.position.set(x, 0.3, z);
+  grave.rotation.y = (Math.random() - 0.5) * 0.4;
+  grave.rotation.z = (Math.random() - 0.5) * 0.4;
+  scene.add(grave);
 }
 
-window.addEventListener('resize', () =>
-{
-    // Update sizes
-    sizes.width = window.innerWidth
-    sizes.height = window.innerHeight
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.render(scene, camera);
 
-    // Update camera
-    camera.aspect = sizes.width / sizes.height
-    camera.updateProjectionMatrix()
+window.addEventListener("resize", () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
 
-    // Update renderer
-    renderer.setSize(sizes.width, sizes.height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-})
-
-/**
- * Camera
- */
-// Base camera
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.x = 4
-camera.position.y = 2
-camera.position.z = 5
-scene.add(camera)
-
-// Controls
-const controls = new OrbitControls(camera, canvas)
-controls.enableDamping = true
-
-/**
- * Renderer
- */
-const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
-})
-renderer.setSize(sizes.width, sizes.height)
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-/**
- * Animate
- */
-const clock = new THREE.Clock()
-
-const tick = () =>
-{
-    const elapsedTime = clock.getElapsedTime()
-
-    // Update controls
-    controls.update()
-
-    // Render
-    renderer.render(scene, camera)
-
-    // Call tick again on the next frame
-    window.requestAnimationFrame(tick)
+function animate() {
+  window.requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+  controls.update();
 }
-
-tick()
+animate();
